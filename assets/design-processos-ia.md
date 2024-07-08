@@ -1,6 +1,6 @@
 ### Urls dos Recursos citados
-- **bpmn.io**: https://demo.bpmn.io/new
-- **GPT Mermaid2BPMN.io**: https://chatgpt.com/g/g-drXzaoC6y-mermaid2bpmn-io
+- **bpmn.io**: [https://demo.bpmn.io/new](https://demo.bpmn.io/new)
+- **GPT Mermaid2BPMN.io**: [https://chatgpt.com/g/g-drXzaoC6y-mermaid2bpmn-io](https://chatgpt.com/g/g-drXzaoC6y-mermaid2bpmn-io)
 
 ### Prompt para geração do Diagrama Mermaid
 ```
