@@ -12,5 +12,5 @@ Vou listá-los abaixo e quero que me pergunte caso tenha alguma dúvida.
 
 Depois de resolvidas as dúvidas, quero que você gere um diagrama mermaid do meu processo. Este diagrama deve ter apenas um nó como começo (Start) e apenas um nó como fim (End).
 
-{Aqui, comecei a explicar sobre a empresa}
+{Escreva aqui as etapas do processo da sua empresa}
 ```
