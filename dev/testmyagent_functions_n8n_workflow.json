@@ -1,0 +1,911 @@
+{
+  "name": "testmyagent_functions",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c8938cc3-041f-48c7-9a65-3923b6372a1d",
+              "name": "conversations",
+              "value": "={{ $json.output.conversations }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        540,
+        380
+      ],
+      "id": "89087716-a06d-45f4-8f0f-23d5667ae0b2",
+      "name": "Set response"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0049332b-3ed6-41a9-8b8e-25fe118c394f",
+              "name": "prompt",
+              "value": "={{ $json.body.prompt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -20,
+        380
+      ],
+      "id": "49118a8b-1615-453f-94fd-9aaa9d455082",
+      "name": "Set variables"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"conversations\": [\n    {\n      \"user\": \"Oi\",\n      \"agent\": \"Olá, tudo bem? Sou Adriana da Casa Sertanejo Eletro, como posso ajudar você hoje?\"\n    },\n    {\n      \"user\": \"Estou interessado em comprar um notebook\",\n      \"agent\": \"Ótimo! Você busca algum modelo específico ou precisa de recomendação?\"\n    }\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        360,
+        600
+      ],
+      "id": "3dd95f11-f1ef-45d4-8a88-95c1c16b7059",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        180,
+        80
+      ],
+      "id": "38a4b26d-fce6-40e1-8364-14dc78100a2e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "v6SvwIEOh1paZUkZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é um agente especializado em gerar conversas sintéticas realistas entre um usuário e um agente de IA. Dado um texto curto ou descrição da conversa desejada, você deve retornar uma conversa estruturada no formato JSON, alternando as falas entre \\\"user\\\" e \\\"agent\\\".\n\n## Regras:\n- Sempre retorne um objeto JSON com uma única chave chamada \\\"conversations\\\", que contém um array de objetos.\n- Cada objeto no array deve possuir exatamente duas chaves: \\\"user\\\" e \\\"agent\\\".\n- \\\"user\\\" contém a fala do usuário, e \\\"agent\\\" contém a fala correspondente do agente de IA.\n- As falas devem ser breves, naturais e coerentes com o contexto fornecido.\n\n## Exemplo 1:\n\nInput:\n\"Olá\\nOlá, em que posso ajudar?\\nQuero reservar uma mesa para dois\\nClaro, qual horário?\"\n\nOutput:\n```json\n{\n  \\\"conversations\\\": [\n    {\n      \\\"user\\\": \\\"Olá\\\",\n      \\\"agent\\\": \\\"Olá, em que posso ajudar?\\\"\n    },\n    {\n      \\\"user\\\": \\\"Quero reservar uma mesa para dois\\\",\n      \\\"agent\\\": \\\"Claro, qual horário?\\\"\n    }\n  ]\n}\n```\n\n## Exemplo 2 (one-shot com descrição):\n\nInput:\n\"conversa entre cliente e vendedor de e-commerce\"\n\nOutput:\n```json\n{\n  \\\"conversations\\\": [\n    {\n      \\\"user\\\": \\\"Oi\\\",\n      \\\"agent\\\": \\\"Olá, tudo bem? Sou Adriana da Casa Sertanejo Eletro, como posso ajudar você hoje?\\\"\n    },\n    {\n      \\\"user\\\": \\\"Estou interessado em comprar um notebook\\\",\n      \\\"agent\\\": \\\"Ótimo! Você busca algum modelo específico ou precisa de recomendação?\\\"\n    }\n  ]\n}\n```\n\nAgora gere o JSON para o seguinte texto:\n\nInput:\n\"{{ $json.prompt }}\"\n\nOutput:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        180,
+        380
+      ],
+      "id": "9062f8bf-e9ca-45ba-8c35-187f78ec6990",
+      "name": "One-Scenario Generator"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generateScenario",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        380
+      ],
+      "id": "bf1bff97-c4fb-4653-b1ec-f623f8b01463",
+      "name": "generateScenario",
+      "webhookId": "b1af20f2-0bf3-4d1c-8f54-f0df7f29d2cb"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0049332b-3ed6-41a9-8b8e-25fe118c394f",
+              "name": "prompt",
+              "value": "={{ $json.body.prompt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -20,
+        -140
+      ],
+      "id": "70cc1232-c703-4d5d-92a7-0414aab1bd63",
+      "name": "Set variables multi"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generateMultiScenarios",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -140
+      ],
+      "id": "86b10cac-40eb-465d-ba4c-f3143bc4c9e9",
+      "name": "generateMultiScenarios",
+      "webhookId": "b1af20f2-0bf3-4d1c-8f54-f0df7f29d2cb"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        740,
+        -140
+      ],
+      "id": "01e42d2a-eb52-41fc-96d0-1fdd2ccfb210",
+      "name": "Respond to generateMultiScenarios"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        740,
+        380
+      ],
+      "id": "6be52130-e7dd-4439-a9c8-3631509c8b76",
+      "name": "Respond to generateScenario"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é um agente especializado em gerar cenários múltiplos de teste para avaliar respostas de agentes de IA. Receberá um input textual curto ou uma descrição breve do tipo de conversa desejada e deverá retornar um JSON estruturado com cenários de testes individuais.\n\nCada cenário gerado deve seguir esta estrutura:\n\n```json\n{\n  \"scenarios\": [\n    {\n      \"name\": \"(Índice). Nome descritivo do cenário\",\n      \"folder\": \"(Índice). Etapa da conversa\",\n      \"expected\": \"Descrição conceitual clara e específica sobre o que é esperado na resposta do agente, contemplando possíveis variações aceitáveis da resposta literal\",\n      \"conversations\": [\n        {\n          \"user\": \"Input específico do usuário nesta etapa\",\n          \"agent\": \"Resposta esperada do agente nesta etapa\"\n        }\n      ]\n    }\n  ]\n}\n```\n\nRegras para criação dos cenários:\n- Cada cenário representa uma única interação entre usuário e agente.\n- O campo `expected` deve descrever de maneira clara, conceitual e abrangente o comportamento ou a resposta esperada do agente, permitindo variações razoáveis devido à natureza aleatória das respostas.\n- O campo `folder` deve indicar qual etapa da conversa o cenário representa, por exemplo:\n  - `1. Saudação Inicial`, `2. Solicitação de Informações`\n- O campo `name` deve resumir brevemente o objetivo ou contexto do cenário. Ele também deve ser hierarquicamente organizado, de acordo com o campo `folder`, por exemplo:\n  - `1.1. Saudação Inicial Simples`, `2.1. Solicitação de Informações Básicas`\n\nEssa organização hierárquica ajuda a desenhar a árvore de diálogo esperada e a identificar rapidamente a etapa da conversa que cada cenário representa.\n\n\nExemplos:\n\nInput:\n\"conversa entre usuário e agente para reserva de restaurante\"\n\nOutput:\n```json\n{\n  \"scenarios\": [\n    {\n      \"name\": \"1.1. Saudação Inicial Simples\",\n      \"folder\": \"1. Saudação Inicial\",\n      \"expected\": \"O agente deve saudar o usuário e perguntar detalhes necessários para realizar uma reserva, como data, horário ou número de pessoas.\",\n      \"conversations\": [\n        {\n          \"user\": \"Gostaria de fazer uma reserva\",\n          \"agent\": \"Claro! Para quando seria a reserva e quantas pessoas participarão?\"\n        }\n      ]\n    },\n    {\n      \"name\": \"2.1. Confirmação de Reserva Simples\",\n      \"folder\": \"2. Confirmação de Reserva\",\n      \"expected\": \"Após o usuário fornecer detalhes da reserva, o agente deve confirmar claramente as informações fornecidas e verificar se estão corretas.\",\n      \"conversations\": [\n        {\n          \"user\": \"Para amanhã às 20h, duas pessoas.\",\n          \"agent\": \"Perfeito, confirmando: reserva para duas pessoas amanhã às 20h, correto?\"\n        }\n      ]\n    }\n  ]\n}\n\nOutro exemplo de input:\n\"oi\\nOlá, como posso lhe ajudar?\\nQuero informações sobre o produto X\\nClaro, o que você gostaria de saber?\"\n\nNeste caso, você deve gerar cenários de teste para cada interação da conversa, com descrições claras e objetivas do comportamento esperado do agente em cada etapa.\n\nAgora gere o JSON para o seguinte texto:\n\nInput:\n\"{{$json.prompt}}\"\n\nOutput:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        180,
+        -140
+      ],
+      "id": "2d9397fc-a861-40f1-8f68-1260a418efab",
+      "name": "Multi-Scenario Generator"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c8938cc3-041f-48c7-9a65-3923b6372a1d",
+              "name": "scenarios",
+              "value": "={{ $json.output.scenarios }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        540,
+        -140
+      ],
+      "id": "070a8798-3232-419f-84ec-7a8b59ed2f3b",
+      "name": "Set response multi"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        -40
+      ],
+      "id": "04a267ef-31f1-4db0-90d3-2e83170041ba",
+      "name": "End"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"scenarios\": [\n    {\n      \"name\": \"Pedido de Informações sobre Produto\",\n      \"folder\": \"informacoes_produto\",\n      \"expected\": \"O agente deve fornecer informações detalhadas sobre o produto.\",\n      \"conversations\": [\n        {\n          \"user\": \"Quais são as especificações do smartphone modelo X?\",\n          \"agent\": \"O smartphone modelo X possui uma tela de 6.5 polegadas. Ele está disponível por R$ 2.500,00.\"\n        }\n      ]\n    },\n    {\n      \"nome\": \"Suporte Técnico para Conexão à Internet\",\n      \"folder\": \"suporte_internet\",\n      \"expected\": \"O agente deve guiar o usuário por um processo de solução de problemas.\",\n      \"conversations\": [\n        {\n          \"user\": \"Minha internet caiu, o que posso fazer?\",\n          \"agent\": \"Tente reiniciar seu roteador e modem. Se o problema persistir, verifique se há cabos soltos.\"\n        }\n      ]\n    }\n  ]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        360,
+        80
+      ],
+      "id": "bdf2240c-46dd-4add-b5a7-a89ad9557f1f",
+      "name": "Structured Output Parser multi"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini-2024-07-18",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI-2024-07-18"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an impartial judge tasked with evaluating the relevance of responses. For each query, compare the “Agent Response” with the “Expected Response” and determine if the agent’s response is relevant or irrelevant. Provide your judgment as two structured values:\n1. Relevance: “Relevant” or “Irrelevant.”\n2. Explanation: A brief justification for your judgment.\n\nFormat:\nQuery: [Insert query here]\nAgent Response: [Insert agent response here]\nExpected Response: [Insert expected response here]\n\nYour Evaluation (as JSON string):\n- \"relevance\": \"[relevant/irrelevant]\"\n- \"explanation\": \"[Short string explaining the judgment]\"\n\nExample:\n\nQuery: What is the capital of France?\nAgent Response: Paris.\nExpected Response: The capital of France is Paris.\n\nYour Evaluation:\n`{{\"relevance\": \"relevant\", \"explanation\": \"The agent’s response correctly identifies the capital of France as Paris.\"}}`\n\nIf the agent’s response does not align with the expected response or fails to address the query accurately, mark it as “Irrelevant” with a reason why.",
+              "role": "system"
+            },
+            {
+              "content": "=Query: \"{{ $('Set variables1').item.json.inputQuery }}\"\nAgent Response: \"{{ $('Execute Agent Workflow').item.json.message }}\"\nExpected Response: \"{{ $('Set variables1').item.json.outputExpected }}\""
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.7,
+      "position": [
+        1640,
+        860
+      ],
+      "id": "4976873c-25f9-4db6-a85d-247aa98deb65",
+      "name": "Judge Agent",
+      "credentials": {
+        "openAiApi": {
+          "id": "v6SvwIEOh1paZUkZ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseStringToArray(inputString) {\n  try {\n      const result = JSON.parse(inputString);\n\n      return result;\n  } catch (error) {\n      console.error(\"Erro ao parsear a string:\", error);\n      return [];\n  }\n}\n\nconst context = $('Set variables1').first().json.inputContext;\nconst contextArray = parseStringToArray(context);\n\nreturn {\n  contextArray: contextArray,\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        860
+      ],
+      "id": "aa8859cf-cba7-419a-b29e-5ef85d3f25b5",
+      "name": "Parse context (if needed)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bee0a8c6-577a-41b4-8926-0e3e30c74f82",
+              "leftValue": "={{ $json.contextArray }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "array",
+                "operation": "lengthGt",
+                "rightType": "number"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        860
+      ],
+      "id": "db636afe-9176-4a6d-9e28-53c1bdd18a78",
+      "name": "Has context?"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2180,
+        860
+      ],
+      "id": "17f60667-1164-44ea-8389-8969aea48159",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set variables1').item.json.agentWorkflowUrl }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $('Set variables1').item.json.inputQuery }}"
+            },
+            {
+              "name": "user",
+              "value": "={{ $('Set variables1').item.json.sessionId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1400,
+        860
+      ],
+      "id": "d1b38e3d-1663-4e00-a5f6-bf329ad01643",
+      "name": "Execute Agent Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set variables1').item.json.agentWorkflowUrl }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=@reset"
+            },
+            {
+              "name": "user",
+              "value": "={{ $('Set variables1').item.json.sessionId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        860
+      ],
+      "id": "a110aa25-e66e-4ea2-b0e2-343eabf6abb5",
+      "name": "Clear context"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set variables1').item.json.setContextWorkflowUrl }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contextArray",
+              "value": "={{ $json.contextArray }}"
+            },
+            {
+              "name": "sessionId",
+              "value": "={{ $('Set variables1').item.json.sessionId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        840
+      ],
+      "id": "21124846-0db6-413f-98a7-e0964ae8f63b",
+      "name": "Set context"
+    },
+    {
+      "parameters": {},
+      "id": "f937adf0-42f0-4c01-9658-8ed8507046ec",
+      "name": "End1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2360,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a9d33576-c812-485f-8000-e047fa022bf5",
+              "name": "inputContext",
+              "value": "={{ $json.body.context || null }}",
+              "type": "string"
+            },
+            {
+              "id": "6216ab60-f4ce-4c5b-9a6a-8fb06be9978a",
+              "name": "outputExpected",
+              "value": "={{ $json.body.output_expected }}",
+              "type": "string"
+            },
+            {
+              "id": "ef24c3c0-0e06-4f74-9c32-3bfaa964edca",
+              "name": "inputQuery",
+              "value": "={{ $json.body.input_query }}",
+              "type": "string"
+            },
+            {
+              "id": "91f4f31a-798b-4788-ac64-c58e4651ae0b",
+              "name": "scenarioId",
+              "value": "={{ $json.body.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a88ab22d-10d7-4513-a775-a2c706d15891",
+              "name": "sessionId",
+              "value": "={{ 'testmyagent@s.whatsapp.net' }}",
+              "type": "string"
+            },
+            {
+              "id": "ab7cb549-b1ac-4c09-a36c-d71068cface6",
+              "name": "agentWorkflowUrl",
+              "value": "={{ $json.body.n8n_workflow_base_url }}",
+              "type": "string"
+            },
+            {
+              "id": "66816cb1-5216-477b-a150-62fb4b8a2468",
+              "name": "setContextWorkflowUrl",
+              "value": "={{ $json.body.n8n_workflow_base_url }}_set_context",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b90f2da5-298a-48c7-99d6-f08181c8d991",
+      "name": "Set variables1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -20,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b3c84eda-e252-4936-b593-e54af8c71a65",
+              "name": "input_query",
+              "value": "={{ $('Set variables1').item.json.inputQuery }}",
+              "type": "string"
+            },
+            {
+              "id": "44758a21-d132-4e0b-b96c-c708e8eb350f",
+              "name": "output_content",
+              "value": "={{ $('Execute Agent Workflow').item.json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "0e89b823-e640-4712-8278-b5ee8ef0105d",
+              "name": "output_expected",
+              "value": "={{ $('Set variables1').item.json.outputExpected }}",
+              "type": "string"
+            },
+            {
+              "id": "a52bbd13-c328-4a9e-9ae1-08f58ed671a2",
+              "name": "eval_relevance",
+              "value": "={{ $json.message.content.relevance }}",
+              "type": "string"
+            },
+            {
+              "id": "e5b67922-be75-4b2c-aa79-d336e3d35f30",
+              "name": "eval_explanation",
+              "value": "={{ $json.message.content.explanation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2000,
+        860
+      ],
+      "id": "4f3fc8ee-19bf-4e92-b3f2-2a0140bae55e",
+      "name": "Set response1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "runTestExecution",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        860
+      ],
+      "id": "38292c25-0b44-4d28-ba98-6cc3b9dd9eeb",
+      "name": "runTestExecution",
+      "webhookId": "6e9d9161-5583-4085-b09b-f00fe643d25a"
+    },
+    {
+      "parameters": {
+        "content": "# runTestExecution",
+        "height": 80,
+        "width": 2740
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        760
+      ],
+      "id": "4d8dfd8f-33e3-4600-92a8-7a7150bdfb6b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# generateScenario",
+        "height": 80,
+        "width": 1480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        260
+      ],
+      "id": "36ebd9dd-a172-43ab-a8f8-d39b290e7874",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# generateMultiScenarios",
+        "height": 80,
+        "width": 1460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        -260
+      ],
+      "id": "a1576f59-3b61-404f-b6e5-230e98e713bc",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconsole.log(data);\n\nconst keys = Object.keys(data);\nconsole.log(keys);\n\nkeys.forEach((key) => {\n  if (key === 'inputContext') { return false; } \n  if (!data[key]) {\n    throw new Error(`Field ${key} cannot be empty.`)\n  }\n})\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        860
+      ],
+      "id": "c99fc180-cd74-4e1f-8a59-77ef0a27f246",
+      "name": "Do Validation"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set response": {
+      "main": [
+        [
+          {
+            "node": "Respond to generateScenario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set variables": {
+      "main": [
+        [
+          {
+            "node": "One-Scenario Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "One-Scenario Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "One-Scenario Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Multi-Scenario Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One-Scenario Generator": {
+      "main": [
+        [
+          {
+            "node": "Set response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generateScenario": {
+      "main": [
+        [
+          {
+            "node": "Set variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generateMultiScenarios": {
+      "main": [
+        [
+          {
+            "node": "Set variables multi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set variables multi": {
+      "main": [
+        [
+          {
+            "node": "Multi-Scenario Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Multi-Scenario Generator": {
+      "main": [
+        [
+          {
+            "node": "Set response multi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set response multi": {
+      "main": [
+        [
+          {
+            "node": "Respond to generateMultiScenarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to generateMultiScenarios": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to generateScenario": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser multi": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Multi-Scenario Generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Judge Agent": {
+      "main": [
+        [
+          {
+            "node": "Set response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse context (if needed)": {
+      "main": [
+        [
+          {
+            "node": "Has context?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has context?": {
+      "main": [
+        [
+          {
+            "node": "Set context",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Agent Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "End1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Agent Workflow": {
+      "main": [
+        [
+          {
+            "node": "Judge Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear context": {
+      "main": [
+        [
+          {
+            "node": "Parse context (if needed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set context": {
+      "main": [
+        [
+          {
+            "node": "Execute Agent Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set variables1": {
+      "main": [
+        [
+          {
+            "node": "Do Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set response1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "runTestExecution": {
+      "main": [
+        [
+          {
+            "node": "Set variables1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Do Validation": {
+      "main": [
+        [
+          {
+            "node": "Clear context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a01e9dc4-e3d7-40de-8e68-26936842655e",
+  "meta": {
+    "instanceId": "cd49ad56f1bebf5031cc1c04344d5ca135f0b16745ab07342c2bceae862b2068"
+  },
+  "id": "FtGyhAVW41oOWPSG",
+  "tags": []
+}
